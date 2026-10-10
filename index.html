@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desk-Sand · the room held your day</title>
+<style>
+  /* SAV9 tokens — sourced from ~/mirrors/kim2/taste-library/2026-08-16-artifact-house-style-tokens.md */
+  :root {
+    --cream: #f4ecd8;
+    --cream-deep: #ebe0c4;
+    --ink: #2a2418;
+    --ink-soft: #5c5240;
+    --gold: #b8860b;
+    --gold-glow: #d4a836;
+    --rust: #8b3a1c;
+    --teal: #2d5a5a;
+    --shadow: rgba(42, 36, 24, 0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-x: hidden;
+  }
+
+  .desk-surface {
+    background: linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
+    border-radius: 4px;
+    padding: 2rem 1.5rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 2px 24px var(--shadow);
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.01em;
+  }
+
+  .subtitle {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    opacity: 0.6;
+    margin-bottom: 1.75rem;
+    font-style: italic;
+  }
+
+  /* The hourglass */
+  .hourglass {
+    width: 200px;
+    height: 280px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+
+  .hourglass-frame {
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--ink-soft);
+    border-radius: 100px 100px 8px 8px / 140px 140px 8px 8px;
+    background: transparent;
+  }
+
+  .chamber {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    height: 130px;
+    overflow: hidden;
+  }
+
+  .chamber.upper {
+    top: 6px;
+    border-radius: 0 0 90px 90px / 0 0 110px 110px;
+    background: rgba(244, 236, 216, 0.4);
+  }
+
+  .chamber.lower {
+    bottom: 6px;
+    border-radius: 90px 90px 0 0 / 110px 110px 0 0;
+    background: rgba(244, 236, 216, 0.4);
+  }
+
+  .neck {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 12px;
+    z-index: 3;
+  }
+
+  .grain-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  .grain {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--ink-soft);
+    border-radius: 50%;
+    box-shadow: 0 0 1px var(--shadow);
+    opacity: 0.7;
+  }
+
+  .chamber.upper .grain {
+    background: var(--ink-soft);
+  }
+
+  .chamber.lower .grain {
+    background: var(--ink-soft);
+    opacity: 0.85;
+  }
+
+  /* Sand level in upper chamber — for visual fill sense */
+  .sand-level-upper {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 0%;
+    background: linear-gradient(180deg, transparent 0%, var(--ink-soft) 100%);
+    opacity: 0.15;
+    transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sand-level-lower {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0%;
+    background: linear-gradient(0deg, transparent 0%, var(--ink-soft) 100%);
+    opacity: 0.15;
+    transition: height 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Flip animation */
+  .hourglass.flipping .chamber.upper { animation: flipUp 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .hourglass.flipping .chamber.lower { animation: flipDown 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+  .hourglass.flipping { animation: tipRotate 2.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+  @keyframes tipRotate {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(180deg); }
+  }
+
+  @keyframes flipUp {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(180deg); }
+  }
+
+  @keyframes flipDown {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(180deg); }
+  }
+
+  /* Gold accent — only during flip */
+  .hourglass.flipping {
+    filter: drop-shadow(0 0 12px var(--gold-glow));
+  }
+
+  .hourglass.flipping .hourglass-frame {
+    border-color: var(--gold);
+    box-shadow: 0 0 16px var(--gold-glow);
+  }
+
+  /* Stats line */
+  .stats {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-bottom: 1.25rem;
+    font-style: italic;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--ink);
+    font-style: normal;
+    font-weight: 400;
+    margin-bottom: 2px;
+  }
+
+  /* Buttons */
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid var(--ink-soft);
+    color: var(--ink-soft);
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-style: italic;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.02em;
+  }
+
+  button:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  button.primary {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  button.primary:hover {
+    background: var(--gold);
+    color: var(--cream);
+  }
+
+  /* Status messages */
+  .status {
+    margin-top: 1.25rem;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    opacity: 0.55;
+    font-style: italic;
+    min-height: 1em;
+  }
+
+  /* Permission overlay */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(244, 236, 216, 0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+
+  .overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .overlay-content {
+    max-width: 360px;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .overlay-content h2 {
+    font-size: 1.2rem;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ink-soft);
+    margin-bottom: 0.5rem;
+  }
+
+  .overlay-content p {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Calibrating state */
+  .calibrating {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    .hourglass { width: 160px; height: 224px; }
+    .chamber { height: 104px; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .hourglass.flipping,
+    .hourglass.flipping .chamber.upper,
+    .hourglass.flipping .chamber.lower {
+      animation-duration: 0.8s;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-content">
+    <h2>Desk-Sand</h2>
+    <p>The jar will listen to the room. Each grain marks a moment the space was alive. At the day's end, tip the jar to start fresh.</p>
+    <button class="primary" id="startBtn">begin</button>
+  </div>
+</div>
+
+<div class="desk-surface">
+  <h1>Desk-Sand</h1>
+  <div class="subtitle">the room held your day</div>
+
+  <div class="hourglass" id="hourglass">
+    <div class="hourglass-frame"></div>
+    <div class="chamber upper">
+      <div class="grain-container" id="grainsUpper"></div>
+      <div class="sand-level-upper" id="sandLevelUpper"></div>
+    </div>
+    <div class="neck"></div>
+    <div class="chamber lower">
+      <div class="grain-container" id="grainsLower"></div>
+      <div class="sand-level-lower" id="sandLevelLower"></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div>
+      <span class="stat-value" id="grainCount">0</span>
+      <span>grains today</span>
+    </div>
+    <div>
+      <span class="stat-value" id="thresholdDisplay">—</span>
+      <span>threshold</span>
+    </div>
+    <div>
+      <span class="stat-value" id="timeDisplay">—</span>
+      <span>time to tip</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="tipBtn">tip the jar</button>
+    <button id="calibrateBtn">recalibrate</button>
+  </div>
+
+  <div class="status" id="status">listening…</div>
+</div>
+
+<script>
+(() => {
+  // === Config (overridable via URL params for testing) ===
+  const params = new URLSearchParams(location.search);
+  const TICK_MS = (parseInt(params.get('tick')) || 15) * 60 * 1000; // default 15 min
+  const TICK_MS_TEST = params.get('tick') ? parseInt(params.get('tick')) * 1000 : TICK_MS;
+  const DAY_END_HOUR = parseInt(params.get('dayend')) || 22; // 22:00 AEST
+  const AUTO_CALIBRATE = params.get('calibrate') === '1';
+
+  // === State ===
+  let audioCtx = null;
+  let analyser = null;
+  let micStream = null;
+  let threshold = 0.01; // default RMS
+  let grainCount = 0;
+  let flipped = false;
+  let lastTickTime = null;
+  let tickInterval = null;
+  let calibrationSamples = [];
+  let isCalibrating = false;
+
+  // === DOM ===
+  const $ = (id) => document.getElementById(id);
+  const overlay = $('overlay');
+  const startBtn = $('startBtn');
+  const tipBtn = $('tipBtn');
+  const calibrateBtn = $('calibrateBtn');
+  const hourglass = $('hourglass');
+  const grainsUpper = $('grainsUpper');
+  const grainsLower = $('grainsLower');
+  const grainCountEl = $('grainCount');
+  const thresholdEl = $('thresholdDisplay');
+  const timeEl = $('timeDisplay');
+  const statusEl = $('status');
+  const sandLevelUpper = $('sandLevelUpper');
+  const sandLevelLower = $('sandLevelLower');
+
+  // === Init: get mic on first user gesture ===
+  async function initAudio() {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const source = audioCtx.createMediaStreamSource(micStream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      source.connect(analyser);
+      statusEl.textContent = 'listening…';
+
+      if (AUTO_CALIBRATE) {
+        await calibrate(30);
+      }
+
+      startTicks();
+      updateTimeDisplay();
+      setInterval(updateTimeDisplay, 60000);
+    } catch (e) {
+      // Mic denied — graceful degradation
+      statusEl.textContent = 'mic access denied — using time-only fallback';
+      threshold = 0;
+      thresholdEl.textContent = 'time';
+      startTicks();
+      updateTimeDisplay();
+      setInterval(updateTimeDisplay, 60000);
+    }
+  }
+
+  // === RMS calculation ===
+  function getRMS() {
+    if (!analyser) return 0;
+    const buf = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) {
+      const v = (buf[i] - 128) / 128;
+      sum += v * v;
+    }
+    return Math.sqrt(sum / buf.length);
+  }
+
+  // === Calibration: sample room for N seconds, set threshold to 1.5× baseline ===
+  async function calibrate(seconds = 30) {
+    isCalibrating = true;
+    statusEl.textContent = `calibrating… listen for ${seconds}s`;
+    statusEl.classList.add('calibrating');
+    const samples = [];
+    const start = Date.now();
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        samples.push(getRMS());
+        if (Date.now() - start >= seconds * 1000) {
+          clearInterval(interval);
+          const baseline = samples.reduce((a, b) => a + b, 0) / samples.length;
+          threshold = baseline * 1.5 || 0.01;
+          thresholdEl.textContent = threshold.toFixed(4);
+          isCalibrating = false;
+          statusEl.classList.remove('calibrating');
+          statusEl.textContent = 'listening…';
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  // === Tick: check ambient level, add grain if above threshold ===
+  function tick() {
+    if (flipped || isCalibrating) return;
+    const rms = getRMS();
+    const isPresent = rms > threshold;
+    if (isPresent) {
+      addGrain('upper');
+      grainCount++;
+      grainCountEl.textContent = grainCount;
+    }
+    lastTickTime = Date.now();
+  }
+
+  function startTicks() {
+    if (tickInterval) clearInterval(tickInterval);
+    tickInterval = setInterval(tick, TICK_MS_TEST);
+    // Fire one tick immediately for testing
+    setTimeout(tick, 1000);
+  }
+
+  // === Add a grain to a chamber ===
+  function addGrain(chamber) {
+    const container = chamber === 'upper' ? grainsUpper : grainsLower;
+    const grain = document.createElement('div');
+    grain.className = 'grain';
+    const rect = container.getBoundingClientRect();
+    grain.style.left = (10 + Math.random() * (rect.width - 14)) + 'px';
+    grain.style.top = (10 + Math.random() * (rect.height - 14)) + 'px';
+    container.appendChild(grain);
+    updateSandLevels();
+  }
+
+  function updateSandLevels() {
+    const total = grainCount || 1;
+    const upperPct = Math.min(100, (grainCount / 40) * 100); // 40 grains = full
+    sandLevelUpper.style.height = (flipped ? 0 : upperPct) + '%';
+    sandLevelLower.style.height = (flipped ? 100 : 0) + '%';
+  }
+
+  // === Tip the jar (end-of-day or manual) ===
+  function tipJar() {
+    if (flipped) return;
+    flipped = true;
+    hourglass.classList.add('flipping');
+    statusEl.textContent = 'the day pours through…';
+
+    // After animation, reset for next day
+    setTimeout(() => {
+      // Move all grains from upper to lower
+      while (grainsUpper.firstChild) {
+        grainsLower.appendChild(grainsUpper.firstChild);
+      }
+      // Re-randomize positions in lower
+      const rect = grainsLower.getBoundingClientRect();
+      Array.from(grainsLower.children).forEach(g => {
+        g.style.left = (10 + Math.random() * (rect.width - 14)) + 'px';
+        g.style.top = (10 + Math.random() * (rect.height - 14)) + 'px';
+      });
+      hourglass.classList.remove('flipping');
+      grainCount = 0;
+      grainCountEl.textContent = '0';
+      statusEl.textContent = 'ready for tomorrow';
+      updateSandLevels();
+    }, 2400);
+  }
+
+  // === Time display: time until next day-end ===
+  function updateTimeDisplay() {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const currentMin = h * 60 + m;
+    const dayEndMin = DAY_END_HOUR * 60;
+    let diffMin;
+    if (currentMin < dayEndMin) {
+      diffMin = dayEndMin - currentMin;
+    } else {
+      diffMin = (24 * 60) - currentMin + dayEndMin;
+    }
+    const hh = Math.floor(diffMin / 60);
+    const mm = diffMin % 60;
+    timeEl.textContent = `${hh}h ${mm}m`;
+
+    // Auto-flip at day-end
+    if (h === DAY_END_HOUR && m === 0 && !flipped) {
+      tipJar();
+    }
+  }
+
+  // === Wire buttons ===
+  startBtn.addEventListener('click', () => {
+    overlay.classList.add('hidden');
+    initAudio();
+  });
+
+  tipBtn.addEventListener('click', tipJar);
+
+  calibrateBtn.addEventListener('click', async () => {
+    calibrateBtn.disabled = true;
+    await calibrate(15);
+    calibrateBtn.disabled = false;
+  });
+
+  // === Expose for smoke-test ===
+  window.__deskSand = {
+    getState: () => ({ grainCount, threshold, flipped, audioState: audioCtx?.state }),
+    forceTick: () => tick(),
+    tip: () => tipJar(),
+    addTestGrain: (chamber = 'upper') => addGrain(chamber),
+    getRMS,
+    thresholdEl,
+    grainCountEl,
+    audioCtx
+  };
+})();
+</script>
+</body>
+</html>
